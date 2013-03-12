@@ -60,15 +60,15 @@ void activationFunction(ActivationFunction act, const Vt& a, Vt& z);
 void activationFunctionDerivative(ActivationFunction act, const Vt& z, Vt& gd);
 
 void softmax(Vt& y);
-void logistic(const Vt& a, Vt& z);
-void logisticDerivative(const Vt& z, Vt& gd);
-void normaltanh(const Vt& a, Vt& z);
-void normaltanhDerivative(const Vt& z, Vt& gd);
-void scaledtanh(const Vt& a, Vt& z);
-void scaledtanhDerivative(const Vt& z, Vt& gd);
-void rectifier(const Vt& a, Vt& z);
-void rectifierDerivative(const Vt& z, Vt& gd);
-void linear(const Vt& a, Vt& z);
-void linearDerivative(Vt& gd);
+void logistic(const fpt* a, fpt* z, const int J);
+void logisticDerivative(const fpt* z, fpt* gd, const int J);
+void normaltanh(const fpt* a, fpt* z, const int J);
+void normaltanhDerivative(const fpt* z, fpt* gd, const int J);
+void scaledtanh(const fpt* a, fpt* z, const int J);
+void scaledtanhDerivative(const fpt* z, fpt* gd, const int J);
+void rectifier(const fpt* a, fpt* z, const int J);
+void rectifierDerivative(const fpt* z, fpt* gd, const int J);
+void linear(const fpt* a, fpt* z, const int J);
+void linearDerivative(fpt* gd, const int J);
 
 }

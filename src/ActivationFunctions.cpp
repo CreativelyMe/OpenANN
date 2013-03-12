@@ -1,6 +1,7 @@
 #include <ActivationFunctions.h>
 #include <limits>
 #include <cmath>
+#include <cstring>
 
 namespace OpenANN
 {
@@ -10,20 +11,20 @@ void activationFunction(ActivationFunction act, const Vt& a, Vt& z)
   switch(act)
   {
     case LOGISTIC:
-      logistic(a, z);
+      logistic(a.data(), z.data(), a.rows());
       break;
     case TANH:
-      normaltanh(a, z);
+      normaltanh(a.data(), z.data(), a.rows());
       break;
     case TANH_SCALED:
-      scaledtanh(a, z);
+      scaledtanh(a.data(), z.data(), a.rows());
       break;
     case RECTIFIER:
-      rectifier(a, z);
+      rectifier(a.data(), z.data(), a.rows());
       break;
     case LINEAR:
     default:
-      linear(a, z);
+      linear(a.data(), z.data(), a.rows());
       break;
   }
 }
@@ -33,20 +34,20 @@ void activationFunctionDerivative(ActivationFunction act, const Vt& z, Vt& gd)
   switch(act)
   {
     case LOGISTIC:
-      logisticDerivative(z, gd);
+      logisticDerivative(z.data(), gd.data(), gd.rows());
       break;
     case TANH:
-      normaltanhDerivative(z, gd);
+      normaltanhDerivative(z.data(), gd.data(), gd.rows());
       break;
     case TANH_SCALED:
-      scaledtanhDerivative(z, gd);
+      scaledtanhDerivative(z.data(), gd.data(), gd.rows());
       break;
     case RECTIFIER:
-      rectifierDerivative(z, gd);
+      rectifierDerivative(z.data(), gd.data(), gd.rows());
       break;
     case LINEAR:
     default:
-      linearDerivative(gd);
+      linearDerivative(gd.data(), gd.rows());
       break;
   }
 }
@@ -60,69 +61,79 @@ void softmax(Vt& y)
   y /= y.sum();
 }
 
-void logistic(const Vt& a, Vt& z)
+void logistic(const fpt * a, fpt* z, const int J)
 {
-  for(int j = 0; j < a.rows(); j++)
+  for(int j = 0; j < J; j++, a++, z++)
   {
-    if(a(j) < -45.0)
-      z(j) = 0.0;
-    else if(a(j) > 45.0)
-      z(j) = 1.0;
+    if(*a < -45.0)
+      *z = 0.0;
+    else if(*a > 45.0)
+      *z = 1.0;
     else
-      z(j) = 1.0 / (1.0+std::exp(-a(j)));
+      *z = 1.0 / (1.0+std::exp(-(*a)));
   }
 }
 
-void logisticDerivative(const Vt& z, Vt& gd)
+void logisticDerivative(const fpt* z, fpt* gd, const int J)
 {
-  for(int j = 0; j < gd.rows(); j++)
-    gd(j) = z(j)*(1.0 - z(j));
+  for(int j = 0; j < J; j++, z++, gd++)
+  {
+    register fpt zv = *z;
+    *gd = zv*(1.0 - zv);
+  }
 }
 
-void normaltanh(const Vt& a, Vt& z)
+void normaltanh(const fpt* a, fpt* z, const int J)
 {
-  for(int j = 0; j < a.rows(); j++)
-    z(j) = std::tanh(a(j));
+  for(int j = 0; j < J; j++, a++, z++)
+    *z = std::tanh(*a);
 }
 
-void normaltanhDerivative(const Vt& z, Vt& gd)
+void normaltanhDerivative(const fpt* z, fpt* gd, const int J)
 {
-  for(int j = 0; j < gd.rows(); j++)
-    gd(j) = 1.0 - z(j)*z(j);
+  for(int j = 0; j < J; j++, z++, gd++)
+  {
+    register fpt zv = *z;
+    *gd = 1.0 - zv*zv;
+  }
 }
 
-void scaledtanh(const Vt& a, Vt& z)
+void scaledtanh(const fpt* a, fpt* z, const int J)
 {
-  for(int j = 0; j < a.rows(); j++)
-    z(j) = 1.7159*std::tanh(0.66666667*a(j));
+  for(int j = 0; j < J; j++, a++, z++)
+    *z = 1.7159*std::tanh(0.66666667 * *a);
 }
 
-void scaledtanhDerivative(const Vt& z, Vt& gd)
+void scaledtanhDerivative(const fpt* z, fpt* gd, const int J)
 {
-  for(int j = 0; j < gd.rows(); j++)
-    gd(j) = 0.66666667/1.7159*(1.7159+z(j))*(1.7159-z(j));
+  for(int j = 0; j < J; j++, z++, gd++)
+  {
+    register fpt zv = 1.7159 * *z;
+    *gd = 0.66666667/1.7159 * zv*zv;
+  }
 }
 
-void rectifier(const Vt& a, Vt& z)
+void rectifier(const fpt* a, fpt* z, const int J)
 {
-  for(int j = 0; j < a.rows(); j++)
-    z(j) = std::max<fpt>((fpt) 0.0, a(j));
+  for(int j = 0; j < J; j++, a++, z++)
+    *z = std::max<fpt>(0.0, *a);
 }
 
-void rectifierDerivative(const Vt& z, Vt& gd)
+void rectifierDerivative(const fpt* z, fpt* gd, const int J)
 {
-  for(int j = 0; j < gd.rows(); j++)
-    gd(j) = z(j) == (fpt) 0.0 ? (fpt) 0.0 : (fpt) 1.0;
+  for(int j = 0; j < J; j++, gd++, z++)
+    *gd = *z == (fpt) 0.0 ? 0.0 : 1.0;
 }
 
-void linear(const Vt& a, Vt& z)
+void linear(const fpt* a, fpt* z, const int J)
 {
-  z.middleRows(0, a.rows()) = a;
+  std::memcpy(z, a, sizeof(fpt)*J);
 }
 
-void linearDerivative(Vt& gd)
+void linearDerivative(fpt* gd, const int J)
 {
-  gd.fill(1.0);
+  for(int j = 0; j < J; j++, gd++)
+    *gd = 1.0;
 }
 
 }
