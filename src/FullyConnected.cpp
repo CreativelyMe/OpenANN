@@ -1,5 +1,6 @@
 #include <layers/FullyConnected.h>
 #include <Random.h>
+#include <EigenWrapper.h>
 #ifdef CUDA_AVAILABLE
 #include <cuBLASInterface.cuh>
 #endif
@@ -103,8 +104,10 @@ void FullyConnected::forwardPropagate(Vt* x, Vt*& y, bool dropout)
 #else
   a = W * *x;
 #endif
+  OPENANN_CHECK_MATRIX_BROKEN(a);
   // Compute output
   activationFunction(act, a, this->y);
+  OPENANN_CHECK_MATRIX_BROKEN(this->y);
   if(dropout)
   {
     RandomNumberGenerator rng;

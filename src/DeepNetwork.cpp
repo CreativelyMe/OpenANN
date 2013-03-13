@@ -11,6 +11,7 @@
 #include <optimization/IPOPCMAES.h>
 #include <optimization/LMA.h>
 #include <optimization/MBSGD.h>
+#include <EigenWrapper.h>
 
 namespace OpenANN {
 
@@ -267,8 +268,10 @@ Vt DeepNetwork::operator()(const Vt& x)
       layer != layers.end(); layer++)
     (**layer).forwardPropagate(y, y, dropout);
   tempOutput = *y;
+  OPENANN_CHECK_MATRIX_BROKEN(tempOutput);
   if(errorFunction == CE)
     OpenANN::softmax(tempOutput);
+  OPENANN_CHECK_MATRIX_BROKEN(tempOutput);
   return tempOutput;
 }
 
@@ -321,8 +324,9 @@ fpt DeepNetwork::error(unsigned int i)
     {
       fpt out = tempOutput(f);
       if(out < 1e-45)
-	out = 1e-45;
+        out = 1e-45;
       e -= dataSet->getTarget(i)(f) * std::log(out);
+      OPENANN_CHECK_INF_AND_NAN(e);
     }
   }
   else
@@ -365,6 +369,7 @@ Vt DeepNetwork::gradient(unsigned int i)
     (**layer).backpropagate(e, e);
   for(int i = 0; i < P; i++)
     tempGradient(i) = *derivatives[i];
+  OPENANN_CHECK_MATRIX_BROKEN(tempGradient);
   return tempGradient;
 }
 

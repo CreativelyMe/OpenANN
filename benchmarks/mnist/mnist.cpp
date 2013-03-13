@@ -52,8 +52,7 @@ int main(int argc, char** argv)
      .maxPoolingLayer(2, 2)                                       //  16 x  4 x  4
      .fullyConnectedLayer(120, OpenANN::RECTIFIER, 0.05)          // 120
      .fullyConnectedLayer(84, OpenANN::RECTIFIER, 0.05)           //  84*/
-     .fullyConnectedLayer(300, OpenANN::RECTIFIER, 0.05)
-     .fullyConnectedLayer(100, OpenANN::RECTIFIER, 0.05)
+     .fullyConnectedLayer(800, OpenANN::RECTIFIER, 0.05)
      .outputLayer(loader.F, OpenANN::LINEAR, 0.05)                //  10
      .trainingSet(loader.trainingInput, loader.trainingOutput);
   OpenANN::DirectStorageDataSet testSet(loader.testInput, loader.testOutput,
