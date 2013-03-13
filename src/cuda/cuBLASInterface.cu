@@ -49,8 +49,11 @@ bool CUBLASContext::getMatrix(float* host, const float* device, int rows, int co
   }
 }
 
-bool CUBLASContext::multiplyMatrixVector(float* matrix, float* vector, float* result, int rows, int cols)
+bool CUBLASContext::multiplyMatrixMatrix(float* a, float* b, float* result, int rows1, int cols1, int cols2)
 {
   float alpha = 1.0, beta = 0.0;
-  return handleCUBLASError(cublasSgemv(handle, CUBLAS_OP_N, rows, cols, &alpha, matrix, rows, vector, 1, &beta, result, 1));
+  if(cols2 == 1)
+    return handleCUBLASError(cublasSgemv(handle, CUBLAS_OP_N, rows1, cols1, &alpha, a, rows1, b, 1, &beta, result, 1));
+  else
+    return handleCUBLASError(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, rows1, cols2, cols1, &alpha, a, rows1, b, cols1, &beta, result, rows1));
 }

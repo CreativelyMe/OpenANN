@@ -16,7 +16,7 @@ public:
   bool freeMatrix(float* device);
   bool setMatrix(const float* host, float* device, int rows, int cols);
   bool getMatrix(float* host, const float* device, int rows, int cols);
-  bool multiplyMatrixVector(float* matrix, float* vector, float* result, int rows, int cols);
+  bool multiplyMatrixMatrix(float* a, float* b, float* result, int rows1, int cols1, int cols2);
 };
 
 #endif

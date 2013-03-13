@@ -97,7 +97,7 @@ void FullyConnected::forwardPropagate(Vt* x, Vt*& y, bool dropout)
 #ifdef CUDA_AVAILABLE
   if(!CUBLASContext::instance.setMatrix(x->data(), xOnDevice, I, 1))
     abort();
-  if(!CUBLASContext::instance.multiplyMatrixVector(WOnDevice, xOnDevice, aOnDevice, J, I))
+  if(!CUBLASContext::instance.multiplyMatrixMatrix(WOnDevice, xOnDevice, aOnDevice, J, I, 1))
     abort();
   if(!CUBLASContext::instance.getMatrix(a.data(), aOnDevice, J, 1))
     abort();

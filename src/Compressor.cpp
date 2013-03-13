@@ -61,7 +61,7 @@ Vt Compressor::compress(const Vt& instance)
     Vt result(cm.rows());
     if(!CUBLASContext::instance.setMatrix(instance.data(), inputOnDevice, instance.rows(), 1))
       abort();
-    if(!CUBLASContext::instance.multiplyMatrixVector(cmOnDevice, inputOnDevice, outputOnDevice, cm.rows(), cm.cols()))
+    if(!CUBLASContext::instance.multiplyMatrixMatrix(cmOnDevice, inputOnDevice, outputOnDevice, cm.rows(), cm.cols(), 1))
       abort();
     if(!CUBLASContext::instance.getMatrix(result.data(), outputOnDevice, result.rows(), 1))
       abort();
