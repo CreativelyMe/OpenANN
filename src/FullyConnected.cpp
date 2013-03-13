@@ -1,6 +1,5 @@
 #include <layers/FullyConnected.h>
 #include <Random.h>
-#undef CUDA_AVAILABLE
 #ifdef CUDA_AVAILABLE
 #include <cuBLASInterface.cuh>
 #endif
@@ -70,6 +69,7 @@ void FullyConnected::initializeParameters()
   for(int j = 0; j < J; j++)
     for(int i = 0; i < I; i++)
       W(j, i) = rng.sampleNormalDistribution<fpt>() * stdDev;
+  updatedParameters();
 }
 
 void FullyConnected::updatedParameters()

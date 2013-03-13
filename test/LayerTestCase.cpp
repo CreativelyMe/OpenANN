@@ -135,6 +135,7 @@ void LayerTestCase::fullyConnected()
   for(std::vector<fpt*>::iterator it = parameterPointers.begin();
       it != parameterPointers.end(); it++)
     **it = 1.0;
+  layer.updatedParameters();
   Vt x(3);
   x << 0.5, 1.0, 2.0;
   Vt e(3);
