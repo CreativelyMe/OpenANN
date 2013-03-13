@@ -48,10 +48,16 @@ class FullyConnected : public Layer
   Vt yd;
   Vt deltas;
   Vt e;
+#ifdef CUDA_AVAILABLE
+  fpt* WOnDevice;
+  fpt* xOnDevice;
+  fpt* aOnDevice;
+#endif
 
 public:
   FullyConnected(OutputInfo info, int J, bool bias, ActivationFunction act,
                  fpt stdDev, fpt dropoutProbability, fpt maxSquaredWeightNorm);
+  ~FullyConnected();
   virtual OutputInfo initialize(std::vector<fpt*>& parameterPointers,
                                 std::vector<fpt*>& parameterDerivativePointers);
   virtual void initializeParameters();

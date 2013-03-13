@@ -1,5 +1,9 @@
 #include <layers/FullyConnected.h>
 #include <Random.h>
+#undef CUDA_AVAILABLE
+#ifdef CUDA_AVAILABLE
+#include <cuBLASInterface.cuh>
+#endif
 
 namespace OpenANN {
 
@@ -12,6 +16,26 @@ FullyConnected::FullyConnected(OutputInfo info, int J, bool bias,
     maxSquaredWeightNorm(maxSquaredWeightNorm), W(J, I), Wd(J, I), x(0), a(J),
     y(J+bias), yd(J), deltas(J), e(I)
 {
+#ifdef CUDA_AVAILABLE
+  if(!CUBLASContext::instance.allocateMatrix(&WOnDevice, J, I))
+    abort();
+  if(!CUBLASContext::instance.allocateMatrix(&xOnDevice, I, 1))
+    abort();
+  if(!CUBLASContext::instance.allocateMatrix(&aOnDevice, J, 1))
+    abort();
+#endif
+}
+
+FullyConnected::~FullyConnected()
+{
+#ifdef CUDA_AVAILABLE
+  if(!CUBLASContext::instance.freeMatrix(WOnDevice))
+    abort();
+  if(!CUBLASContext::instance.freeMatrix(xOnDevice))
+    abort();
+  if(!CUBLASContext::instance.freeMatrix(aOnDevice))
+    abort();
+#endif
 }
 
 OutputInfo FullyConnected::initialize(std::vector<fpt*>& parameterPointers,
@@ -59,13 +83,26 @@ void FullyConnected::updatedParameters()
         W.row(j) *= sqrt(maxSquaredWeightNorm / squaredNorm);
     }
   }
+#ifdef CUDA_AVAILABLE
+  if(!CUBLASContext::instance.setMatrix(W.data(), WOnDevice, J, I))
+    abort();
+#endif
 }
 
 void FullyConnected::forwardPropagate(Vt* x, Vt*& y, bool dropout)
 {
   this->x = x;
   // Activate neurons
+#ifdef CUDA_AVAILABLE
+  if(!CUBLASContext::instance.setMatrix(x->data(), xOnDevice, I, 1))
+    abort();
+  if(!CUBLASContext::instance.multiplyMatrixVector(WOnDevice, xOnDevice, aOnDevice, J, I))
+    abort();
+  if(!CUBLASContext::instance.getMatrix(a.data(), aOnDevice, J, 1))
+    abort();
+#else
   a = W * *x;
+#endif
   // Compute output
   activationFunction(act, a, this->y);
   if(dropout)
